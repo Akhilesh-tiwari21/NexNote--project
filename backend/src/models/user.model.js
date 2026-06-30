@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
         required: [true, "Name is required"],
         trim: true,
         minlength: [4, "Name must be at least 4 characters"],
-        maxlength: [12, "Name cannot exceed 12 characters"]
+        maxlength: [15, "Name cannot exceed 12 characters"]
     },
     username: {
         type: String,
@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Password is required"],
         minlength: [8, "Password must be at least 8 characters long"],
-        maxlength: [16, "Password cannot exceed 16 characters"],
+
         select: false
     },
     profileImage: {
@@ -49,24 +49,26 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ["user", "admin"],
         default: "user"
+    },
+    refreshToken: {
+        type: String,
+        default: null
     }
 }, { timestamps: true });
 
 
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
     // Don't hash again if password wasn't modified
     if (!this.isModified("password")) {
-        return next();
+        return ;
     }
 
     try {
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
 
-        next();
-
     } catch (error) {
-        next(error);
+        console.error(`error message ${error.message}`);
     }
 });
 
